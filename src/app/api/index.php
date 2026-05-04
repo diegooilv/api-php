@@ -16,5 +16,6 @@ $router = new Router();
 
 $router->post('/user/register', [UserController::class, 'register']);
 $router->post('/user/index', [UserController::class, 'index']);
+$router->get('/user/{id}', [UserController::class, 'show']);
 
 $router->run();

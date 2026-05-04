@@ -45,4 +45,20 @@ class UserController
             Response::json(['erro' => 'Erro interno'], 500);
         }
     }
+
+    public function show($id)
+    {
+        try {
+            $userModel = new UserModel();
+            $user = $userModel->findById($id);
+            if (!$user) {
+                Response::json(['erro' => 'ID Inválido!'], 404);
+            }
+            Response::json($user, 200);
+
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            Response::json(['erro' => 'Erro interno'], 500);
+        }
+    }
 }
