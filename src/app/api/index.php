@@ -23,5 +23,6 @@ $router->patch('/user/update/{id}', [UserController::class, 'patch']);
 $router->put('/user/update/{id}', [UserController::class, 'update']);
 $router->post('/user/login', [UserController::class, 'login']);
 $router->post('/user/logout', [UserController::class, 'logout']);
+$router->delete('/user/delete', [UserController::class, 'delete']);
 
 $router->run();

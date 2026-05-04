@@ -164,4 +164,17 @@ class UserController
             Response::json(['erro' => 'Erro interno'], 500);
         }
     }
+
+    public function delete()
+    {
+        try {
+            $row = AuthMiddleware::handle();
+            $userModel = new UserModel();
+            $userModel->delete($row['user_id']);
+            Response::json(['status' => 'Sucesso'], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            Response::json(['erro' => 'Erro interno'], 500);
+        }
+    }
 }
