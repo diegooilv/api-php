@@ -67,6 +67,37 @@ input:focus {
     color: #888;
 }
 
+.dashboard-card {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+}
+
+textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    font-family: sans-serif;
+}
+
+textarea:focus {
+    border-color: #555;
+}
+
+textarea:hover {
+    border-color: #aaa;
+}
+
 button {
     width: 100%;
     padding: 0.7rem;
