@@ -7,23 +7,20 @@ class UserController
     {
         try {
             $body = json_decode(file_get_contents('php://input'), true);
-            ValidationMiddleware::required(
-                $body,
-                ['name', 'email', 'password']
-            );
+            ValidationMiddleware::required($body, ['name', 'email', 'password']);
 
             $userModel = new UserModel();
             $exists = $userModel->findByEmail($body['email']);
 
             if ($exists) {
-                Response::json(['erro' => 'Email já cadastrado'], 409);
+                Response::error(['erro' => 'Email já cadastrado']);
             }
 
             $user = $userModel->create($body);
-            Response::json(['user' => $user], 201);
+            Response::created(['user' => $user]);
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -32,7 +29,7 @@ class UserController
         try {
             $row = AuthMiddleware::admin();
             if (!$row) {
-                Response::json(['erro' => 'Acesso Negado!'], 403);
+                Response::forbidden();
             }
 
             $userModel = new UserModel();
@@ -40,10 +37,10 @@ class UserController
             foreach ($users as &$user) {
                 unset($user['password']);
             }
-            Response::json($users, 200);
+            Response::success(['users' => $users]);
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -53,8 +50,9 @@ class UserController
             $userModel = new UserModel();
             $user = $userModel->findById($id);
             if (!$user) {
-                Response::json(['erro' => 'Usuário não encontrado'], 404);
+                Response::notFound(['erro' => 'Usuário não encontrado']);
             }
+
             $userRequest = AuthMiddleware::handle();
             $userRequest = $userModel->findById($userRequest['user_id']) ?? null;
 
@@ -62,16 +60,18 @@ class UserController
             $isAdmin = ($userRequest['role'] ?? null) === 'admin';
 
             if (!$isOwner && !$isAdmin) {
-                Response::json(['erro' => 'Acesso Negado!'], 403);
+                Response::forbidden();
             }
+
             unset($user['password']);
-            Response::json($user, 200);
+            Response::success(['user' => $user]);
 
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
+
     public function patch($id)
     {
         try {
@@ -79,20 +79,20 @@ class UserController
 
             $row = AuthMiddleware::handle();
             if ($row['user_id'] != $id) {
-                Response::json(['erro' => 'Você não é esse usuário!'], 403);
+                Response::forbidden(['erro' => 'Você não é esse usuário!']);
             }
 
             $userModel = new UserModel();
             $status = $userModel->update($id, $body);
             if ($status) {
-                Response::json(['status' => 'Usuário Atualizado!'], 200);
+                Response::success();
             } else {
-                Response::json(['erro' => 'ID Inválido!'], 404);
+                Response::notFound(['erro' => 'ID Inválido!']);
             }
 
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -103,25 +103,22 @@ class UserController
 
             $row = AuthMiddleware::handle();
             if ($row['user_id'] != $id) {
-                Response::json(['erro' => 'Você não é esse usuário!'], 403);
+                Response::forbidden(['erro' => 'Você não é esse usuário!']);
             }
 
-            ValidationMiddleware::required(
-                $body,
-                ['name', 'phone', 'bio']
-            );
+            ValidationMiddleware::required($body, ['name', 'phone', 'bio']);
 
             $userModel = new UserModel();
             $status = $userModel->update($id, $body);
             if ($status) {
-                Response::json(['status' => 'Usuário Atualizado!'], 200);
+                Response::success();
             } else {
-                Response::json(['erro' => 'ID Inválido!'], 404);
+                Response::notFound(['erro' => 'ID Inválido!']);
             }
 
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -134,20 +131,20 @@ class UserController
             $userModel = new UserModel();
             $user = $userModel->findByEmail($body['email']);
             if (!$user) {
-                Response::json(['erro' => 'Email Inválido!'], 404);
+                Response::notFound(['erro' => 'Email Inválido!']);
             }
 
             if (!password_verify($body['password'], $user['password'])) {
-                Response::json(['erro' => 'Acesso Não Autorizado!'], 401);
+                Response::unauthorized();
             }
 
             $tokenModel = new TokenModel();
             $token = $tokenModel->create($user['id']);
-            Response::json(['token' => $token], 200);
+            Response::success(['token' => $token]);
 
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -157,11 +154,11 @@ class UserController
             $row = AuthMiddleware::handle();
             $tokenModel = new TokenModel();
             $tokenModel->deleteByToken($row['token']);
-            Response::json(['status' => 'Sucesso'], 200);
+            Response::success();
 
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 
@@ -171,10 +168,10 @@ class UserController
             $row = AuthMiddleware::handle();
             $userModel = new UserModel();
             $userModel->delete($row['user_id']);
-            Response::json(['status' => 'Sucesso'], 200);
+            Response::success();
         } catch (Exception $e) {
             error_log($e->getMessage());
-            Response::json(['erro' => 'Erro interno'], 500);
+            Response::internalError();
         }
     }
 }

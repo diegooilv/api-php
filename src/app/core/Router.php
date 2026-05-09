@@ -42,17 +42,33 @@ class Router
         $this->addRota('DELETE', $path, $callback);
     }
 
+    public function options($path, $callback)
+    {
+        $this->addRota('OPTIONS', $path, $callback);
+    }
+
+    public function any($path, $callback)
+    {
+        foreach (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method) {
+            $this->addRota($method, $path, $callback);
+        }
+    }
+
     public function run()
     {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type');
         $method = $_SERVER['REQUEST_METHOD'];
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
         $base = '/api';
 
         if (str_starts_with($uri, $base)) {
             $uri = substr($uri, strlen($base));
         }
+
+        $uri = '/' . trim($uri, '/');
 
         if (isset($this->rotas[$method][$uri])) {
             [$class, $action] = $this->rotas[$method][$uri];
@@ -72,9 +88,6 @@ class Router
             }
         }
 
-        $response = new Response();
-        $response->json([
-            "erro" => "Rota não encontrada"
-        ], 404);
+        Response::notFound();
     }
 }
